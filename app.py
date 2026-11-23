@@ -1,10 +1,12 @@
 """Customer Support Bot (Day 7 Challenge: risk review).
 
 A small Flask app. A customer sends a message, the LLM decides on a reply
-and an action, and the app carries out the action.
+and an action, and the app carries out safe, read-only actions.
 """
 import json
 import logging
+import time
+import uuid
 
 from flask import Flask, jsonify, request
 
@@ -13,6 +15,8 @@ from llm import call_llm
 app = Flask(__name__)
 
 API_KEY = "sk-demo-4f9a2c71-FAKE-KEY-for-training-only"
+MODEL_NAME = "fake-support-model"
+COST_PER_TOKEN_INR = 0.0005
 
 logging.basicConfig(filename="logs/app.log", level=logging.INFO)
 
@@ -25,7 +29,6 @@ CUSTOMERS = {
     "ravi.kumar@example.com": {"name": "Ravi Kumar", "phone": "+91 98480 12345", "active": True},
     "priya.s@example.com": {"name": "Priya Sharma", "phone": "+91 99890 67890", "active": True},
 }
-REFUNDS = []
 
 
 # ---------- Tools the LLM can use ----------
@@ -35,21 +38,7 @@ def get_order_status(order_id):
     return order["status"] if order else "Order not found"
 
 
-def issue_refund(order_id, amount):
-    REFUNDS.append({"order_id": order_id, "amount": amount})
-    return f"Refunded Rs {amount} for order {order_id}"
-
-
-def delete_customer_account(customer_email):
-    CUSTOMERS.pop(customer_email, None)
-    return f"Deleted account {customer_email}"
-
-
-TOOLS = {
-    "get_order_status": get_order_status,
-    "issue_refund": issue_refund,
-    "delete_customer_account": delete_customer_account,
-}
+TOOLS = {"get_order_status": get_order_status}
 
 
 # ---------- Chat endpoint ----------
@@ -68,20 +57,47 @@ def chat():
         f"Customer phone: {customer.get('phone')}\n"
         f"Customer message: {message}"
     )
-    logging.info("PROMPT: %s", prompt)
+    logging.info("AI request received")
 
-    text, usage = call_llm(prompt, API_KEY)
+    request_id = str(uuid.uuid4())
+    started_at = time.perf_counter()
+    input_tokens = None
+    output_tokens = None
+    try:
+        text, usage = call_llm(prompt, API_KEY)
+        input_tokens = usage["input_tokens"]
+        output_tokens = usage["output_tokens"]
+    finally:
+        latency_ms = (time.perf_counter() - started_at) * 1000
+        estimated_cost = (
+            (input_tokens + output_tokens) * COST_PER_TOKEN_INR
+            if input_tokens is not None and output_tokens is not None
+            else None
+        )
+        logging.info(
+            "AI call request_id=%s model=%s latency_ms=%.2f input_tokens=%s "
+            "output_tokens=%s estimated_cost_inr=%s",
+            request_id,
+            MODEL_NAME,
+            latency_ms,
+            input_tokens if input_tokens is not None else "unknown",
+            output_tokens if output_tokens is not None else "unknown",
+            f"{estimated_cost:.6f}" if estimated_cost is not None else "unknown",
+        )
+
     result = json.loads(text)
 
     action = result.get("action")
     action_result = None
     if action:
         args = result.get("args", {})
-        if args.get("customer_email") == "from_request":
-            args["customer_email"] = email
-        action_result = TOOLS[action](**args)
+        tool = TOOLS.get(action)
+        if tool is None:
+            result["reply"] = "This request needs a verified support agent."
+        else:
+            action_result = tool(**args)
 
-    logging.info("REPLY to %s: %s", email, result["reply"])
+    logging.info("AI response generated")
     return jsonify({"reply": result["reply"], "action_result": action_result})
 
 
