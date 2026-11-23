@@ -1,8 +1,8 @@
 # Customer Support Bot – Day 7 Challenge
 
 A small Flask app for customer support. A customer sends a message, an AI model
-decides on a reply and an action (check an order, refund, close an account), and
-the app carries out that action.
+decides on a reply and an action. The app only carries out read-only order
+status checks; refunds and account closures need a verified support agent.
 
 The AI model is **fake** (`llm.py`), so the app runs without internet or a real key.
 All customers, orders and keys in this repo are **made up**.

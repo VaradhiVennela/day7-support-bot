@@ -1,7 +1,7 @@
 """Customer Support Bot (Day 7 Challenge: risk review).
 
 A small Flask app. A customer sends a message, the LLM decides on a reply
-and an action, and the app carries out the action.
+and an action, and the app carries out safe, read-only actions.
 """
 import json
 import logging
@@ -25,7 +25,6 @@ CUSTOMERS = {
     "ravi.kumar@example.com": {"name": "Ravi Kumar", "phone": "+91 98480 12345", "active": True},
     "priya.s@example.com": {"name": "Priya Sharma", "phone": "+91 99890 67890", "active": True},
 }
-REFUNDS = []
 
 
 # ---------- Tools the LLM can use ----------
@@ -35,21 +34,7 @@ def get_order_status(order_id):
     return order["status"] if order else "Order not found"
 
 
-def issue_refund(order_id, amount):
-    REFUNDS.append({"order_id": order_id, "amount": amount})
-    return f"Refunded Rs {amount} for order {order_id}"
-
-
-def delete_customer_account(customer_email):
-    CUSTOMERS.pop(customer_email, None)
-    return f"Deleted account {customer_email}"
-
-
-TOOLS = {
-    "get_order_status": get_order_status,
-    "issue_refund": issue_refund,
-    "delete_customer_account": delete_customer_account,
-}
+TOOLS = {"get_order_status": get_order_status}
 
 
 # ---------- Chat endpoint ----------
@@ -77,9 +62,11 @@ def chat():
     action_result = None
     if action:
         args = result.get("args", {})
-        if args.get("customer_email") == "from_request":
-            args["customer_email"] = email
-        action_result = TOOLS[action](**args)
+        tool = TOOLS.get(action)
+        if tool is None:
+            result["reply"] = "This request needs a verified support agent."
+        else:
+            action_result = tool(**args)
 
     logging.info("AI response generated")
     return jsonify({"reply": result["reply"], "action_result": action_result})
