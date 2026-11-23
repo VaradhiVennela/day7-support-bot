@@ -1,0 +1,48 @@
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 404-644-812
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 00:27:29] "[31m[1mGET /chat HTTP/1.1[0m" 405 -
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 00:27:29] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 404-644-812
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 00:35:25] "[33mGET / HTTP/1.1[0m" 404 -
+INFO:root:PROMPT: You are a helpful support agent. Reply in JSON with reply, action and args.
+Customer name: Ravi Kumar
+Customer email: ravi.kumar@example.com
+Customer phone: +91 98480 12345
+Customer message: Where is my order 10231?
+INFO:root:REPLY to ravi.kumar@example.com: Let me check order 10231.
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:08:49] "POST /chat HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 404-644-812
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:11:14] "[31m[1mGET /chat HTTP/1.1[0m" 405 -
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:11:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:11:16] "[31m[1mGET /chat HTTP/1.1[0m" 405 -
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:11:26] "[33mGET / HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:11:29] "[33mGET / HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:12:40] "[31m[1mGET /chat HTTP/1.1[0m" 405 -
+INFO:root:PROMPT: You are a helpful support agent. Reply in JSON with reply, action and args.
+Customer name: Ravi Kumar
+Customer email: ravi.kumar@example.com
+Customer phone: +91 98480 12345
+Customer message: I want a refund for order 10231.
+INFO:root:REPLY to ravi.kumar@example.com: Sorry about that. I have issued your refund.
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:15:15] "POST /chat HTTP/1.1" 200 -
+INFO:root:PROMPT: You are a helpful support agent. Reply in JSON with reply, action and args.
+Customer name: Ravi Kumar
+Customer email: ravi.kumar@example.com
+Customer phone: +91 98480 12345
+Customer message: Please close my account permanently.
+INFO:root:REPLY to ravi.kumar@example.com: Your account has been closed.
+INFO:werkzeug:127.0.0.1 - - [24/Nov/2026 01:16:18] "POST /chat HTTP/1.1" 200 -
