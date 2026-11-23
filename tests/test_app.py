@@ -41,7 +41,13 @@ def test_unverified_side_effect_actions_are_rejected(client, monkeypatch, action
         "action": action,
         "args": args,
     }
-    monkeypatch.setattr("app.call_llm", lambda prompt, api_key: (json.dumps(result), {}))
+    monkeypatch.setattr(
+        "app.call_llm",
+        lambda prompt, api_key: (
+            json.dumps(result),
+            {"input_tokens": 0, "output_tokens": 0},
+        ),
+    )
     customers_before = CUSTOMERS.copy()
 
     response = client.post(

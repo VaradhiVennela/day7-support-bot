@@ -5,6 +5,8 @@ and an action, and the app carries out safe, read-only actions.
 """
 import json
 import logging
+import time
+import uuid
 
 from flask import Flask, jsonify, request
 
@@ -13,6 +15,8 @@ from llm import call_llm
 app = Flask(__name__)
 
 API_KEY = "sk-demo-4f9a2c71-FAKE-KEY-for-training-only"
+MODEL_NAME = "fake-support-model"
+COST_PER_TOKEN_INR = 0.0005
 
 logging.basicConfig(filename="logs/app.log", level=logging.INFO)
 
@@ -55,7 +59,32 @@ def chat():
     )
     logging.info("AI request received")
 
-    text, usage = call_llm(prompt, API_KEY)
+    request_id = str(uuid.uuid4())
+    started_at = time.perf_counter()
+    input_tokens = None
+    output_tokens = None
+    try:
+        text, usage = call_llm(prompt, API_KEY)
+        input_tokens = usage["input_tokens"]
+        output_tokens = usage["output_tokens"]
+    finally:
+        latency_ms = (time.perf_counter() - started_at) * 1000
+        estimated_cost = (
+            (input_tokens + output_tokens) * COST_PER_TOKEN_INR
+            if input_tokens is not None and output_tokens is not None
+            else None
+        )
+        logging.info(
+            "AI call request_id=%s model=%s latency_ms=%.2f input_tokens=%s "
+            "output_tokens=%s estimated_cost_inr=%s",
+            request_id,
+            MODEL_NAME,
+            latency_ms,
+            input_tokens if input_tokens is not None else "unknown",
+            output_tokens if output_tokens is not None else "unknown",
+            f"{estimated_cost:.6f}" if estimated_cost is not None else "unknown",
+        )
+
     result = json.loads(text)
 
     action = result.get("action")
